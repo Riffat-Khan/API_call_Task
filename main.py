@@ -2,51 +2,59 @@ import requests
 import datetime
 import json
 from argparser.argparser import ArgumentParser
-from pdf.write_to_pdf import writing_to_pdf
+from pdf.write_to_pdf import create_pdf
 from pdf.graph_pdf import graph_plot
 
-def fetch_data(url, base_currency):
+def fetch_data(url):
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
-        records = data[base_currency]
-        fifteen_records = {currency : records[currency] for currency in list(records)[:196:13]} 
-        return fifteen_records
+        return data
     else:
         return response.status_code
     
-def history_record(base_currency, days):    
+def records_15(url): 
+    data = fetch_data(url)
+    fifteen_records = {}
+    fifteen_records['date'] = data['date']
+    currency_record = data['usd']
+    currency = ['alex', 'aoa', 'blur', 'ant', 'core', 'imp' , 'joe', 'kgs', 'mad', 'magic', 'nexo', 'ocean', 'pkr', 'poly', 'comp']
+    currency_fifteen = {key : currency_record[key] for key in currency if key in currency_record} 
+    fifteen_records['usd'] = currency_fifteen
+    return fifteen_records
+
+    
+def history_record(days):    
     all_records = []
-    for day in range(days+1):
+    for day in range(days):
         date = datetime.date.today() - datetime.timedelta(day)
         date_format = date.strftime('%Y-%m-%d')
-        url = f'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{date_format}/v1/currencies/{base_currency}.json'
-        res = fetch_data(url, base_currency)
-        resultant_array = [{key : round(value,4)} for key, value in res.items()]
+        url = f'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{date_format}/v1/currencies/usd.json'
+        res = records_15(url)
+        resultant_array = [{key : value} for key, value in res.items()]
         if resultant_array:
             all_records.append(resultant_array)
     return all_records
 
-def record_difference(base_currency, days):
-    records = history_record(base_currency, days)
-    difference_record = []
-    curr = []
-    for i in range(len(records)-2):
-        prev_record = records[i]
-        next_record = records[i+1]
-        for prev, next in zip(prev_record, next_record):
-            prev_key = list(prev.keys())[0]
-            next_key = list(next.keys())[0]
-            if prev_key in prev and next_key in next:
-                difference = next[next_key] - prev[prev_key]
-                prev['diff'] = round(difference, 4)
+def record_difference(days):
+    records = history_record(days)
+    for i in range(len(records)-1):
+        prev_record = records[i][1]
+        prev_currency = prev_record['usd']
+        next_record = records[i+1][1]
+        next_currency = next_record['usd']
+        rate_diff = {}
+        dict_rate_diff = {}
+        keys = ['alex', 'aoa', 'blur', 'ant', 'core', 'imp' , 'joe', 'kgs', 'mad', 'magic', 'nexo', 'ocean', 'pkr', 'poly', 'comp']
+        for key in keys:
+            difference = next_currency[key] - prev_currency[key]
+            rate_diff[key] = difference
+        dict_rate_diff['diff'] = rate_diff    
+        records[i].append(dict_rate_diff)
+    
+    return records
         
-        difference_record.append(prev_record)
         
-    difference_record.append(records[-1])
-    return difference_record
-        
-
 def main():
     parser = ArgumentParser()
     args = parser.parse_args()
@@ -54,14 +62,13 @@ def main():
     base_currency = args.currency
     days = args.days
     
-    content = record_difference(base_currency, days)
-    print(content[0])
-    latest = history_record(base_currency, days=0)
-    print('latest record', json.dumps(latest))
+    content = record_difference(days)
+    print(content)
+    print('\nlatest record', json.dumps(content[0]))
     
-    print(graph_plot(history_record(base_currency, days)))
+    graph_plot(content)
     
-    # writing_to_pdf(content)
+    create_pdf(content, 'record_currency.pdf')
 
     
 if __name__ == '__main__':
