@@ -2,16 +2,13 @@ import requests
 import datetime
 import json
 from argparser.argparser import ArgumentParser
+from utils.fetch import fetch_data
+from utils.enum_keys import Currency
+from utils.parse_records import parse_15_records
+
 from pdf.write_to_pdf import create_pdf
 from pdf.graph_pdf import graph_plot
 
-def fetch_data(url):
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        return data
-    else:
-        return response.status_code
     
 def records_15(url): 
     data = fetch_data(url)
@@ -24,13 +21,13 @@ def records_15(url):
     return fifteen_records
 
     
-def history_record(days):    
+def history_record(data, Currency, days):    
     all_records = []
     for day in range(days):
         date = datetime.date.today() - datetime.timedelta(day)
         date_format = date.strftime('%Y-%m-%d')
         url = f'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{date_format}/v1/currencies/usd.json'
-        res = records_15(url)
+        res = parse_15_records(Currency)
         resultant_array = [{key : value} for key, value in res.items()]
         if resultant_array:
             all_records.append(resultant_array)
@@ -58,20 +55,19 @@ def record_difference(days):
 def main():
     parser = ArgumentParser()
     args = parser.parse_args()
-
-    base_currency = args.currency
     days = args.days
     
-    content = record_difference(days)
+    url = f'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json' 
+    data = fetch_data(url)   
+    content = parse_15_records(data, Currency)
     print(content)
-    print('\nlatest record', json.dumps(content[0]))
+    # print('\nlatest record', json.dumps(content[0]))
     
-    graph_plot(content)
+    # print(graph_plot(content))
     
-    create_pdf(content, 'record_currency.pdf')
+    # create_pdf(content, 'record_currency.pdf')
 
     
 if __name__ == '__main__':
-    
     main()
     

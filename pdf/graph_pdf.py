@@ -24,10 +24,10 @@ def graph_plot(data):
         
         plt.plot(x_range, y_range)
 
-        plt.xlabel('date')
-        plt.ylabel('rate')
+        plt.xlabel('rate')
+        plt.ylabel('date')
         
         keys = ['alex', 'aoa', 'blur', 'ant', 'core', 'imp' , 'joe', 'kgs', 'mad', 'magic', 'nexo', 'ocean', 'pkr', 'poly', 'comp']
-        plt.title(keys[i] , 'currency rate change')
+        plt.title(f'{keys[i]} currency rate')
     
         plt.show()
