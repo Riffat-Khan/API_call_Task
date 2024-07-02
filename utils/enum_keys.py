@@ -2,18 +2,19 @@ from enum import Enum
 
 class Currency(Enum):
     ALEX = 'alex'
-    AOA = 'aoa'
-    BLUR = 'blur'
     ANT = 'ant'
+    AGI = 'agi'
+    BLUR = 'blur'
+    COMP = 'comp'
     CORE = 'core'
     IMP = 'imp'
     JOE = 'joe'
-    KGS = 'kgs'
+    KAS = 'kas'
     MAD = 'mad'
     MAGIC = 'magic'
     NEXO = 'nexo'
     OCEAN = 'ocean'
-    PKR = 'pkr'
+    PIXEL = 'pixel'
     POLY = 'poly'
-    COMP = 'comp'
+    
     
