@@ -17,4 +17,7 @@ class Currency(Enum):
     PIXEL = 'pixel'
     POLY = 'poly'
     
+    @classmethod
+    def values(cls):
+        return [currency.value for currency in cls]
     
